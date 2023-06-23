@@ -9,7 +9,7 @@ require("dotenv").config;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.hyu0vhy.mongodb.net/?retryWrites=true&w=majority`;
+const uri = "mongodb+srv://backpack6470:J7FTBG8XivIcxt2K@cluster0.hyu0vhy.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -24,10 +24,10 @@ async function run() {
   try {
     const userCollection = client.db("backpack").collection("users");
     const destinationCollection = client.db("backpack").collection("destination");
-    // const serviceCollection = client.db("backpack").collection("services");
     const blogCollection = client.db("backpack").collection("blogs");
     const userReviewCollection = client.db("backpack").collection("reviews");
     const paymentsCollection = client.db("backpack").collection("payments");
+    const discountCollection = client.db("backpack").collection("discount");
 
     // blog collection
     app.get("/blogs", async (req, res) => {
@@ -49,7 +49,7 @@ async function run() {
       res.send(cursor);
     });
     // destination collection
-    app.get("/destination", async(req, res) =>{
+    app.get("/destination", async (req, res) => {
       const query = {};
       const cursor = await destinationCollection.find(query).toArray();
       res.send(cursor);
@@ -60,6 +60,43 @@ async function run() {
       const query = { id: destinationId };
       const result = await destinationCollection.findOne(query);
       res.send(result);
+    });
+    // discount collection post
+    app.post("/discount", async (req, res) => {
+      const dicount = req.body;
+      const result = await discountCollection.insertOne(dicount);
+      res.send(result);
+    });
+
+    // discount collection get by email
+    app.get("/discount", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = discountCollection.find(query);
+      const discount = await cursor.toArray();
+      res.send(discount);
+    });
+    // payment collection post
+    app.post("/payment", async (req, res) => {
+      const payment = req.body;
+      const result = await paymentsCollection.insertOne(payment);
+      res.send(result);
+    });
+    // payment collection get query by email
+    app.get("/payment", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = paymentsCollection.find(query);
+      const payment = await cursor.toArray();
+      res.send(payment);
     });
 
     console.log(`mongodb is connected on port: ${port}`);
