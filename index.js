@@ -28,6 +28,8 @@ async function run() {
     const userReviewCollection = client.db("backpack").collection("reviews");
     const paymentsCollection = client.db("backpack").collection("payments");
     const discountCollection = client.db("backpack").collection("discount");
+    const economicSeatCollection = client.db("backpack").collection("economicSeats");
+    const businessSeatCollection = client.db("backpack").collection("businessSeats");
 
     // blog collection
     app.get("/blogs", async (req, res) => {
@@ -97,6 +99,48 @@ async function run() {
       const cursor = paymentsCollection.find(query);
       const payment = await cursor.toArray();
       res.send(payment);
+    });
+    // economicSeatCollection
+    app.get("/economicSeatCollection", async (req, res) => {
+      const query = {};
+      const result = await economicSeatCollection.find(query).toArray();
+      res.send(result);
+    });
+    // economicSeatCollection by id
+    app.get("/economicSeatCollections", async (req, res) => {
+      const busId = req.query.id;
+      const query = { id: busId };
+      const result = await economicSeatCollection.findOne(query);
+      res.send(result);
+    });
+
+    // businessSeatCollection
+    app.get("/businessSeatCollection", async (req, res) => {
+      const query = {};
+      const result = await businessSeatCollection.find(query).toArray();
+      res.send(result);
+    });
+    // businessSeatCollection by id
+    app.get("/businessSeatCollections", async (req, res) => {
+      const busId = req.query.id;
+      const query = { id: busId };
+      const result = await businessSeatCollection.findOne(query);
+      res.send(result);
+    });
+    // update discount offerTicketQuantity quantity
+    app.put("/discount/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const discount = req.body;
+      const option = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          offerTicketQuantity: discount.decreaseNumber,
+        },
+      };
+      console.log(updatedDoc);
+      const result = await discountCollection.updateOne(filter, updatedDoc, option);
+      res.send(result);
     });
 
     console.log(`mongodb is connected on port: ${port}`);
